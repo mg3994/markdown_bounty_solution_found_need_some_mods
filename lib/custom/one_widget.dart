@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_fadein/flutter_fadein.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 class FadingMarkdownComponent extends StatefulWidget {
@@ -12,55 +15,93 @@ class FadingMarkdownComponent extends StatefulWidget {
 }
 
 class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _animation;
+  late Tween<double> tween;
+  late Tween<double> rtween;
+  late Animation<double> fadeValue;
+
   String _previousText = '';
+  Duration duration = const Duration(seconds: 2);
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1),
-    )..forward();
-    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
+      duration: duration,
+    );
+    final curve = CurvedAnimation(parent: _controller, curve: Curves.linear);
+    tween = Tween(
+      begin: 0.0,
+      end: 1.0,
+    );
+    rtween = Tween(
+      begin: 1.0,
+      end: 0.0,
+    );
+    fadeValue = tween.animate(_controller
+        // curve
+        );
+    if (mounted) {
+      _controller.forward(from: 0.1);
+    }
   }
 
   @override
   void didUpdateWidget(covariant FadingMarkdownComponent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data != widget.data) {
+      setState(() {
+        _previousText = oldWidget.data; // Update to the new data
+      });
+      _controller.forward(
+          from: 0.1); // Restart fade-in only on true content change
+      debugPrint('data changed');
+      // _previousText = widget.data;
+      // _controller.stop();
       // _controller.reset();
-      _controller.forward(from: 0.0);
-      _previousText = widget.data;
+      // _controller.forward(from: 0.0);
+      // _controller.forward(from: 0.1);
     }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<double>(
-        valueListenable: _animation,
-        builder: (context, value, child) {
-          return Stack(
-            children: [
-              Opacity(
-                opacity: 1 - value,
-                child: MarkdownStyledBody(data: _previousText),
-              ),
-              Opacity(
-                opacity: value,
-                child: MarkdownStyledBody(data: widget.data),
-              ),
-            ],
-          );
-        });
+    debugPrint('build=>' + _previousText);
+    // if (_previousText != widget.data) {
+    //   _controllerFI.fadeIn();
+    //   _controllerFO.fadeOut();
+    // }
+    return Stack(
+      children: [
+        AnimatedBuilder(
+            animation: fadeValue,
+            builder: (context, child) {
+              return Visibility(
+                  visible: fadeValue.value < 1.0,
+                  child: Opacity(
+                      opacity: 1 - fadeValue.value,
+                      child: MarkdownStyledBody(data: _previousText)));
+            }),
+        AnimatedBuilder(
+            animation: fadeValue,
+            builder: (context, child) {
+              return Visibility(
+                  visible: fadeValue.value > 0.0,
+                  child: Opacity(
+                      opacity: fadeValue.value,
+                      child: MarkdownStyledBody(data: widget.data)));
+            }),
+      ],
+    );
   }
 }
 
