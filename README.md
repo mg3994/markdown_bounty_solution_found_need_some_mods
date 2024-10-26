@@ -1,3 +1,5 @@
+<!-- To achieve a smooth transition where one MarkdownBody fades out while the other fades in, making them appear as one continuous element, -->
+
 # markdown_fade
 
 A new Flutter project.

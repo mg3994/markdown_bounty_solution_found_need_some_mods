@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
-import 'package:markdown/markdown.dart' as md;
-
-import 'package:markdown_fade/flutter_markdown/lib/flutter_markdown.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 //
 
 void main() {
@@ -58,6 +57,9 @@ class _MyHomePageState extends State<MyHomePage> {
   String currentText = "";
   String newText = "";
 
+  //  GlobalKey _currentKey = GlobalKey();
+  // GlobalKey _previousKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -90,13 +92,25 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Markdown Fadein Example'),
       ),
-      body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: MarkdownBody(
-            selectable: true,
-            currentData: currentText,
-            newData: newText,
-          )),
+      body: FadeMarkdown(
+          // key: ValueKey(currentText),
+          previousText: previousText,
+          currentText: currentText),
+
+      //  Stack(
+      //   children: [
+      //     MarkdownBody(data: previousText).animate().fadeOut(
+      //           duration: const Duration(milliseconds: 2000),
+      //           curve: Curves.linear,
+      //           begin: 1.0,
+      //         ), //fade it out say hide it
+      //     MarkdownBody(data: currentText).animate().fadeIn(
+      //           duration: const Duration(milliseconds: 2000),
+      //           curve: Curves.linear,
+      //           begin: 0.0,
+      //         ), //show it
+      //   ],
+      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Move to the next version and restart the animation
@@ -107,5 +121,71 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+}
+
+class FadeMarkdown extends StatefulWidget {
+  final String previousText;
+  final String currentText;
+  const FadeMarkdown(
+      {super.key, required this.previousText, required this.currentText});
+
+  @override
+  State<FadeMarkdown> createState() => _FadeMarkdownState();
+}
+
+class _FadeMarkdownState extends State<FadeMarkdown>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..forward(from: 0.0);
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller)
+      ..addListener(() {
+        setState(() {});
+      });
+  }
+
+  @override
+  void didUpdateWidget(covariant FadeMarkdown oldWidget) {
+    if (widget.currentText != oldWidget.currentText ||
+        widget.previousText != oldWidget.previousText) {
+      _controller.forward(from: 0.0);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+        valueListenable: _animation,
+        builder: (context, value, child) {
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Opacity(
+                opacity: 1 - _animation.value, // Start with fading out
+
+                child: MarkdownBody(data: widget.previousText),
+              ),
+              Opacity(
+                opacity: _animation.value,
+                child: MarkdownBody(data: widget.currentText),
+              ),
+            ],
+          );
+        });
   }
 }
