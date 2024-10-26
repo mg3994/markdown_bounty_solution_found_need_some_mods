@@ -208,7 +208,8 @@ abstract class MarkdownWidget extends StatefulWidget {
   /// The [data] argument must not be null.
   const MarkdownWidget({
     super.key,
-    required this.data,
+    required this.currentData,
+    required this.newData,
     this.selectable = false,
     this.styleSheet,
     this.styleSheetTheme = MarkdownStyleSheetBaseTheme.material,
@@ -232,7 +233,10 @@ abstract class MarkdownWidget extends StatefulWidget {
   });
 
   /// The Markdown to display.
-  final String data;
+  final String currentData;
+
+  /// The Markdown to display.
+  final String newData;
 
   /// If true, the text is selectable.
   ///
@@ -352,7 +356,8 @@ class _MarkdownWidgetState extends State<MarkdownWidget>
   @override
   void didUpdateWidget(MarkdownWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.data != oldWidget.data ||
+    if (widget.currentData != oldWidget.currentData ||
+        widget.newData != oldWidget.newData ||
         widget.styleSheet != oldWidget.styleSheet) {
       _parseMarkdown();
     }
@@ -380,9 +385,16 @@ class _MarkdownWidgetState extends State<MarkdownWidget>
     );
 
     // Parse the source Markdown data into nodes of an Abstract Syntax Tree.
-    final List<String> lines = const LineSplitter()
-        .convert(widget.data); // \n sprated and make a list seprated
+    final List<String> lines = const LineSplitter().convert(
+        widget.currentData.endsWith(widget.newData)
+            ? widget.currentData
+                .substring(0, widget.currentData.length - widget.newData.length)
+            : widget.newData);
+    final List<String> newLines = const LineSplitter().convert(widget.newData);
     final List<md.Node> astNodes = document.parseLines(lines);
+    final List<md.Node> newASTNodes = document.parseLines(
+        widget.currentData.endsWith(widget.newData) ? newLines : [""]);
+    // debugPrint(newASTNodes.toString());
 
     // Configure a Markdown widget builder to traverse the AST nodes and
     // create a widget tree based on the elements.
@@ -404,6 +416,7 @@ class _MarkdownWidgetState extends State<MarkdownWidget>
     );
 
     _children = builder.build(astNodes);
+    debugPrint(_children.toString());
   }
 
   void _disposeRecognizers() {
@@ -456,7 +469,8 @@ class MarkdownBody extends MarkdownWidget {
   /// Creates a non-scrolling widget that parses and displays Markdown.
   const MarkdownBody({
     super.key,
-    required super.data,
+    required super.currentData,
+    required super.newData,
     super.selectable,
     super.styleSheet,
     super.styleSheetTheme = null,
@@ -511,7 +525,8 @@ class Markdown extends MarkdownWidget {
   /// Creates a scrolling widget that parses and displays Markdown.
   const Markdown({
     super.key,
-    required super.data,
+    required super.currentData,
+    required super.newData,
     super.selectable,
     super.styleSheet,
     super.styleSheetTheme = null,

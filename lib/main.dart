@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       previousText = versionIndex > 0 ? markdownVersions[versionIndex - 1] : "";
       currentText = markdownVersions[versionIndex];
-      // newText = _findNewText(previousText, currentText);
+      newText = _findNewText(previousText, currentText);
     });
   }
 
@@ -94,9 +94,9 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: const EdgeInsets.all(16.0),
           child: MarkdownBody(
             selectable: true,
-            data: currentText,
+            currentData: currentText,
+            newData: newText,
           )),
-
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Move to the next version and restart the animation
@@ -105,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
           _updateText(nextIndex);
         },
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }
