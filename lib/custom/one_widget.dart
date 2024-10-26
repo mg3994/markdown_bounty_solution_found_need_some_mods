@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-class AnimatedTextWidget extends StatefulWidget {
+class FadingMarkdownComponent extends StatefulWidget {
   final String data;
 
-  const AnimatedTextWidget({super.key, required this.data});
+  const FadingMarkdownComponent({super.key, required this.data});
 
   @override
-  State<AnimatedTextWidget> createState() => _AnimatedTextWidgetState();
+  State<FadingMarkdownComponent> createState() =>
+      _FadingMarkdownComponentState();
 }
 
-class _AnimatedTextWidgetState extends State<AnimatedTextWidget>
+class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -22,16 +23,16 @@ class _AnimatedTextWidgetState extends State<AnimatedTextWidget>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
-    );
+    )..forward();
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
   }
 
   @override
-  void didUpdateWidget(covariant AnimatedTextWidget oldWidget) {
+  void didUpdateWidget(covariant FadingMarkdownComponent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data != widget.data) {
-      _controller.reset();
-      _controller.forward();
+      // _controller.reset();
+      _controller.forward(from: 0.0);
       _previousText = widget.data;
     }
   }
@@ -51,14 +52,42 @@ class _AnimatedTextWidgetState extends State<AnimatedTextWidget>
             children: [
               Opacity(
                 opacity: 1 - value,
-                child: MarkdownBody(data: _previousText),
+                child: MarkdownStyledBody(data: _previousText),
               ),
               Opacity(
                 opacity: value,
-                child: MarkdownBody(data: widget.data),
+                child: MarkdownStyledBody(data: widget.data),
               ),
             ],
           );
         });
   }
+}
+
+/// design to `DRY`
+class MarkdownStyledBody extends MarkdownBody {
+  const MarkdownStyledBody({
+    super.key,
+    required super.data,
+    super.selectable,
+    super.styleSheet,
+    super.styleSheetTheme,
+    super.syntaxHighlighter,
+    super.onSelectionChanged,
+    super.onTapLink,
+    super.onTapText,
+    super.imageDirectory,
+    super.blockSyntaxes,
+    super.inlineSyntaxes,
+    super.extensionSet,
+    super.imageBuilder,
+    super.checkboxBuilder,
+    super.bulletBuilder,
+    super.builders,
+    super.paddingBuilders,
+    super.listItemCrossAxisAlignment,
+    super.shrinkWrap = true,
+    super.fitContent = true,
+    super.softLineBreak,
+  });
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:flutter_markdown/flutter_markdown.dart';
+
+import 'custom/one_widget.dart';
 //
 
 void main() {
@@ -92,10 +94,13 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Markdown Fadein Example'),
       ),
-      body: FadeMarkdown(
-          // key: ValueKey(currentText),
-          previousText: previousText,
-          currentText: currentText),
+      body: FadingMarkdownComponent(
+        data: currentText,
+      ),
+      //  FadeMarkdown(
+      //     // key: ValueKey(currentText),
+      //     previousText: previousText,
+      //     currentText: currentText),
 
       //  Stack(
       //   children: [
