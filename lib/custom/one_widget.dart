@@ -31,7 +31,7 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
       vsync: this,
       duration: duration,
     );
-    final curve = CurvedAnimation(parent: _controller, curve: Curves.linear);
+
     tween = Tween(
       begin: 0.0,
       end: 1.0,
@@ -40,11 +40,9 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
       begin: 1.0,
       end: 0.0,
     );
-    fadeValue = tween.animate(_controller
-        // curve
-        );
+    fadeValue = tween.animate(_controller);
     if (mounted) {
-      _controller.forward(from: 0.1);
+      _controller.forward();
     }
   }
 
@@ -55,9 +53,7 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
       setState(() {
         _previousText = oldWidget.data; // Update to the new data
       });
-      _controller.forward(
-          from: -1); // Restart fade-in only on true content change
-      
+      _controller.forward(); // Restart fade-in only on true content change
     }
   }
 
@@ -70,8 +66,6 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
 
   @override
   Widget build(BuildContext context) {
-
-   
     return Stack(
       children: [
         AnimatedBuilder(
