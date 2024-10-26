@@ -117,7 +117,10 @@ class MarkdownBuilder implements md.NodeVisitor {
     this.onSelectionChanged,
     this.onTapText,
     this.softLineBreak = false,
+    required this.controller,
   });
+
+  final Animation<double> controller;
 
   /// A delegate that controls how link and `pre` elements behave.
   final MarkdownBuilderDelegate delegate;
@@ -370,12 +373,13 @@ class MarkdownBuilder implements md.NodeVisitor {
               : _inlines.last.style,
           text: trimText(text.text),
           children: [
-            TextSpan(
-            ).fadeInTextSpan(
-              // controller: controller,
-             text: trimText(text.text),style: _isInBlockquote
+            TextSpan().fadeInTextSpan(
+              controller: controller,
+              text: trimText(text.text),
+              style: _isInBlockquote
                   ? styleSheet.blockquote!.merge(_inlines.last.style)
-                  : _inlines.last.style,),
+                  : _inlines.last.style,
+            ),
           ], //TODO: here too add fade in and all other TextSpans
           recognizer: _linkHandlers.isNotEmpty ? _linkHandlers.last : null,
         ),
@@ -1009,23 +1013,29 @@ class MarkdownBuilder implements md.NodeVisitor {
     //Adding a unique key prevents the problem of using the same link handler for text spans with the same text
     final Key k = key == null ? UniqueKey() : Key(key);
     if (selectable) {
-      return SelectableText.rich(
-        text!,
-        textScaler: styleSheet.textScaler,
-        textAlign: textAlign ?? TextAlign.start,
-        onSelectionChanged: onSelectionChanged != null
-            ? (TextSelection selection, SelectionChangedCause? cause) =>
-                onSelectionChanged!(text.text, selection, cause)
-            : null,
-        onTap: onTapText,
-        key: k,
+      return AnimatedBuilder(
+        animation: controller,
+        builder: (context, child) => SelectableText.rich(
+          text!,
+          textScaler: styleSheet.textScaler,
+          textAlign: textAlign ?? TextAlign.start,
+          onSelectionChanged: onSelectionChanged != null
+              ? (TextSelection selection, SelectionChangedCause? cause) =>
+                  onSelectionChanged!(text.text, selection, cause)
+              : null,
+          onTap: onTapText,
+          key: k,
+        ),
       );
     } else {
-      return Text.rich(
-        text!,
-        textScaler: styleSheet.textScaler,
-        textAlign: textAlign ?? TextAlign.start,
-        key: k,
+      return AnimatedBuilder(
+        animation: controller,
+        builder: (context, child) => Text.rich(
+          text!,
+          textScaler: styleSheet.textScaler,
+          textAlign: textAlign ?? TextAlign.start,
+          key: k,
+        ),
       );
     }
   }

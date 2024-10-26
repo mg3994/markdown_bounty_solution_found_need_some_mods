@@ -344,13 +344,31 @@ abstract class MarkdownWidget extends StatefulWidget {
 }
 
 class _MarkdownWidgetState extends State<MarkdownWidget>
+    with SingleTickerProviderStateMixin
     implements MarkdownBuilderDelegate {
+  late AnimationController _controller;
+  late Animation<double> opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: Duration(seconds: 2), // Adjust duration as needed
+      vsync: this,
+    )..forward(); // Start the animation immediately // Start the animation
+    opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
+  }
+
   List<Widget>? _children;
   final List<GestureRecognizer> _recognizers = <GestureRecognizer>[];
 
   @override
   void didChangeDependencies() {
     _parseMarkdown();
+
+    _controller.addListener(() {
+      setState(() {});
+    });
     super.didChangeDependencies();
   }
 
@@ -360,12 +378,15 @@ class _MarkdownWidgetState extends State<MarkdownWidget>
     if (widget.currentData != oldWidget.currentData ||
         widget.newData != oldWidget.newData ||
         widget.styleSheet != oldWidget.styleSheet) {
+      _controller.repeat();
+
       _parseMarkdown();
     }
   }
 
   @override
   void dispose() {
+    _controller.dispose();
     _disposeRecognizers();
     super.dispose();
   }
@@ -400,21 +421,21 @@ class _MarkdownWidgetState extends State<MarkdownWidget>
     // Configure a Markdown widget builder to traverse the AST nodes and
     // create a widget tree based on the elements.
     final MarkdownBuilder builder = MarkdownBuilder(
-      delegate: this,
-      selectable: widget.selectable,
-      styleSheet: styleSheet,
-      imageDirectory: widget.imageDirectory,
-      imageBuilder: widget.imageBuilder,
-      checkboxBuilder: widget.checkboxBuilder,
-      bulletBuilder: widget.bulletBuilder,
-      builders: widget.builders,
-      paddingBuilders: widget.paddingBuilders,
-      fitContent: widget.fitContent,
-      listItemCrossAxisAlignment: widget.listItemCrossAxisAlignment,
-      onSelectionChanged: widget.onSelectionChanged,
-      onTapText: widget.onTapText,
-      softLineBreak: widget.softLineBreak,
-    );
+        delegate: this,
+        selectable: widget.selectable,
+        styleSheet: styleSheet,
+        imageDirectory: widget.imageDirectory,
+        imageBuilder: widget.imageBuilder,
+        checkboxBuilder: widget.checkboxBuilder,
+        bulletBuilder: widget.bulletBuilder,
+        builders: widget.builders,
+        paddingBuilders: widget.paddingBuilders,
+        fitContent: widget.fitContent,
+        listItemCrossAxisAlignment: widget.listItemCrossAxisAlignment,
+        onSelectionChanged: widget.onSelectionChanged,
+        onTapText: widget.onTapText,
+        softLineBreak: widget.softLineBreak,
+        controller: opacityAnimation);
 
     _children = builder.build(astNodes);
     debugPrint(_children.toString());
