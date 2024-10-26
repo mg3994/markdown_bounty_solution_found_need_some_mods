@@ -42,7 +42,7 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
     );
     fadeValue = tween.animate(_controller);
     if (mounted) {
-      _controller.forward();
+      _controller.forward(from: 0.0);
     }
   }
 
@@ -53,7 +53,8 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
       setState(() {
         _previousText = oldWidget.data; // Update to the new data
       });
-      _controller.forward(); // Restart fade-in only on true content change
+      _controller.forward(
+          from: 0.0); // Restart fade-in only on true content change
     }
   }
 
