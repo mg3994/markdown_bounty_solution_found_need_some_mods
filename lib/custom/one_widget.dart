@@ -52,10 +52,10 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data != widget.data) {
       setState(() {
+        _controller.forward(
+            from: 0.0); // Restart fade-in only on true content change
         _previousText = oldWidget.data; // Update to the new data
       });
-      _controller.forward(
-          from: 0.0); // Restart fade-in only on true content change
     }
   }
 
@@ -69,6 +69,7 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
   @override
   Widget build(BuildContext context) {
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         AnimatedBuilder(
             animation: fadeValue,
