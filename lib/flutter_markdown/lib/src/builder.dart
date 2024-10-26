@@ -5,6 +5,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:markdown_fade/custom/fade_in.dart';
+import 'package:markdown_fade/custom/fade_inspan.dart';
 
 import '_functions_io.dart' if (dart.library.js_interop) '_functions_web.dart';
 import 'style_sheet.dart';
@@ -181,7 +183,10 @@ class MarkdownBuilder implements md.NodeVisitor {
   /// Returns widgets that display the given Markdown nodes.
   ///
   /// The returned widgets are typically used as children in a [ListView].
-  List<Widget> build(List<md.Node> nodes) {
+  List<Widget> build(
+    List<md.Node> nodes,
+    // List<md.Node> newNodes
+  ) {
     _listIndents.clear();
     _blocks.clear();
     _tables.clear();
@@ -357,12 +362,21 @@ class MarkdownBuilder implements md.NodeVisitor {
         ),
       );
     } else {
+      // debugPrint(text.text);
       child = _buildRichText(
         TextSpan(
           style: _isInBlockquote
               ? styleSheet.blockquote!.merge(_inlines.last.style)
               : _inlines.last.style,
           text: trimText(text.text),
+          children: [
+            TextSpan(
+            ).fadeInTextSpan(
+              // controller: controller,
+             text: trimText(text.text),style: _isInBlockquote
+                  ? styleSheet.blockquote!.merge(_inlines.last.style)
+                  : _inlines.last.style,),
+          ], //TODO: here too add fade in and all other TextSpans
           recognizer: _linkHandlers.isNotEmpty ? _linkHandlers.last : null,
         ),
         textAlign: _textAlignForBlockTag(_currentBlockTag),
@@ -386,6 +400,7 @@ class MarkdownBuilder implements md.NodeVisitor {
 
       Widget defaultChild() {
         if (current.children.isNotEmpty) {
+          // debugPrint("current children" + current.children.toString());
           return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: fitContent
@@ -737,16 +752,18 @@ class MarkdownBuilder implements md.NodeVisitor {
       }
     }
 
-    final _InlineElement inline = _inlines.single;
+    final _InlineElement inline = _inlines.single; // i have to merge that here
     if (inline.children.isNotEmpty) {
+      // debugPrint("whats here" + inline.children.toString());
       final List<Widget> mergedInlines = _mergeInlineChildren(
         inline.children,
         textAlign,
       );
       final Wrap wrap = Wrap(
+        // key: ValueKey("test"),
         crossAxisAlignment: WrapCrossAlignment.center,
         alignment: blockAlignment,
-        children: mergedInlines,
+        children: mergedInlines, // + our new child MG
       );
 
       if (textPadding == EdgeInsets.zero) {
@@ -787,6 +804,7 @@ class MarkdownBuilder implements md.NodeVisitor {
 
   /// Merges adjacent [TextSpan] children
   List<Widget> _mergeInlineChildren(
+    // Todo: Have to work here MG
     List<Widget> children,
     TextAlign? textAlign,
   ) {

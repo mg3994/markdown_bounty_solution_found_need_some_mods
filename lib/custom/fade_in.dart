@@ -15,6 +15,26 @@ class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
   late Animation<double> _fadeAnimation;
 
   @override
+  void didUpdateWidget(covariant FadeIn oldWidget) {
+    if (oldWidget.child != widget.child) {
+      _controller.reset();
+      _controller.forward();
+    }
+    // if (oldWidget.fadeDuration != widget.fadeDuration) {
+    //   _controller.dispose();
+    //   _controller = AnimationController(
+    //     duration: Duration(milliseconds: widget.fadeDuration),
+    //     vsync: this,
+    //   );
+    //   _fadeAnimation =
+    //       CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    //   _controller.forward();
+    // }
+
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(

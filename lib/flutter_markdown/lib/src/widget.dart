@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:markdown_fade/custom/fade_in.dart';
 
 import '../flutter_markdown.dart';
 import '_functions_io.dart' if (dart.library.html) '_functions_web.dart';
@@ -389,7 +390,7 @@ class _MarkdownWidgetState extends State<MarkdownWidget>
         widget.currentData.endsWith(widget.newData)
             ? widget.currentData
                 .substring(0, widget.currentData.length - widget.newData.length)
-            : widget.newData);
+            : widget.currentData);
     final List<String> newLines = const LineSplitter().convert(widget.newData);
     final List<md.Node> astNodes = document.parseLines(lines);
     final List<md.Node> newASTNodes = document.parseLines(
@@ -417,6 +418,8 @@ class _MarkdownWidgetState extends State<MarkdownWidget>
 
     _children = builder.build(astNodes);
     debugPrint(_children.toString());
+
+    // debugPrint(FadeIn(child: builder.build(newASTNodes).first).toString());
   }
 
   void _disposeRecognizers() {
