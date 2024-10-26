@@ -56,13 +56,8 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
         _previousText = oldWidget.data; // Update to the new data
       });
       _controller.forward(
-          from: 0.1); // Restart fade-in only on true content change
-      debugPrint('data changed');
-      // _previousText = widget.data;
-      // _controller.stop();
-      // _controller.reset();
-      // _controller.forward(from: 0.0);
-      // _controller.forward(from: 0.1);
+          from: -1); // Restart fade-in only on true content change
+      
     }
   }
 
@@ -75,11 +70,8 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('build=>' + _previousText);
-    // if (_previousText != widget.data) {
-    //   _controllerFI.fadeIn();
-    //   _controllerFO.fadeOut();
-    // }
+
+   
     return Stack(
       children: [
         AnimatedBuilder(
