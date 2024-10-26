@@ -42,6 +42,7 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
     );
     fadeValue = tween.animate(_controller);
     if (mounted) {
+      _controller.reset();
       _controller.forward(from: 0.0);
     }
   }
@@ -72,20 +73,16 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
         AnimatedBuilder(
             animation: fadeValue,
             builder: (context, child) {
-              return Visibility(
-                  visible: fadeValue.value < 1.0,
-                  child: Opacity(
-                      opacity: 1 - fadeValue.value,
-                      child: MarkdownStyledBody(data: _previousText)));
+              return Opacity(
+                  opacity: 1 - fadeValue.value,
+                  child: MarkdownStyledBody(data: _previousText));
             }),
         AnimatedBuilder(
             animation: fadeValue,
             builder: (context, child) {
-              return Visibility(
-                  visible: fadeValue.value > 0.0,
-                  child: Opacity(
-                      opacity: fadeValue.value,
-                      child: MarkdownStyledBody(data: widget.data)));
+              return Opacity(
+                  opacity: fadeValue.value,
+                  child: MarkdownStyledBody(data: widget.data));
             }),
       ],
     );
