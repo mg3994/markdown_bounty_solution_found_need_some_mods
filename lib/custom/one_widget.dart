@@ -49,6 +49,7 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
 
   @override
   void didUpdateWidget(covariant FadingMarkdownComponent oldWidget) {
+    //do not touch this
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data != widget.data) {
       setState(() {
@@ -68,24 +69,28 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        AnimatedBuilder(
-            animation: fadeValue,
-            builder: (context, child) {
-              return Opacity(
-                  opacity: 1 - fadeValue.value,
-                  child: MarkdownStyledBody(data: _previousText));
-            }),
-        AnimatedBuilder(
-            animation: fadeValue,
-            builder: (context, child) {
-              return Opacity(
-                  opacity: fadeValue.value,
-                  child: MarkdownStyledBody(data: widget.data));
-            }),
-      ],
+    debugPrint('build' + _previousText);
+    final reverseOpacity = fadeValue.drive(rtween);
+    final opacity = fadeValue;
+    return RepaintBoundary(
+      key: ValueKey(widget.data),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          IgnorePointer(
+            child: FadeTransition(
+              opacity: reverseOpacity,
+              child: MarkdownStyledBody(
+                  key: ValueKey(_previousText), data: _previousText),
+            ),
+          ),
+          FadeTransition(
+            opacity: opacity,
+            child: MarkdownStyledBody(
+                key: ValueKey(widget.data), data: widget.data),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -95,7 +100,7 @@ class MarkdownStyledBody extends MarkdownBody {
   const MarkdownStyledBody({
     super.key,
     required super.data,
-    super.selectable,
+    super.selectable = true,
     super.styleSheet,
     super.styleSheetTheme,
     super.syntaxHighlighter,
