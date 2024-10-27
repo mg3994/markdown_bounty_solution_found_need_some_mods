@@ -6,7 +6,6 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'blen_mask.dart';
 
-
 class FadingMarkdownComponent extends StatefulWidget {
   final String data;
 
@@ -17,36 +16,8 @@ class FadingMarkdownComponent extends StatefulWidget {
       _FadingMarkdownComponentState();
 }
 
-class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
-    with TickerProviderStateMixin {
-  late AnimationController _controller;
-  late Tween<double> tween;
-  late Tween<double> rtween;
-  late Animation<double> _forwardAnimation;
-  late ReverseAnimation _reverseAnimation;
-
+class _FadingMarkdownComponentState extends State<FadingMarkdownComponent> {
   String _previousText = '';
-  Duration duration = const Duration(seconds: 2);
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-        upperBound: 0.9999,
-        lowerBound: 0.0001,
-        vsync: this,
-        duration: duration,
-        reverseDuration: Duration.zero);
-    _reverseAnimation = ReverseAnimation(_controller);
-    _forwardAnimation = _controller;
-    if (mounted) {
-      _controller.reset();
-      _controller.forward(from: 0.0001);
-      _controller.addListener(() {
-        setState(() {});
-      });
-    }
-  }
 
   @override
   void didUpdateWidget(covariant FadingMarkdownComponent oldWidget) {
@@ -54,51 +25,33 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data != widget.data) {
       setState(() {
-        _controller.forward(
-            from: 0.0001); // Restart fade-in only on true content change
         _previousText = oldWidget.data; // Update to the new data
       });
     }
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-
-    super.dispose();
-  }
-
+// say no to any Animation Builder or that stuff , only can use is AnimationController , Curve you can choose is easeIn or linear , try custom pain for container and pass that animation<double> value to repaint: (animation.value) and hide on based of that
+//it will fix that junk problem //IDEA designed
+//implimentation left
+//Limitation in old idea was Animation Builder is not working properly due to the property it creates its own CustomClip Painter
   @override
   Widget build(BuildContext context) {
-    var forwardAnimation =
-        double.parse(_forwardAnimation.value.toStringAsFixed(4));
-    var reverseAnimation =
-        double.parse(_reverseAnimation.value.toStringAsFixed(4));
-    debugPrint("forwardAnimation: $forwardAnimation");
-    debugPrint("reverseAnimation: $reverseAnimation");
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        BlendMask(
-          blendMode: BlendMode.xor,
-          child: IgnorePointer(
-            child: Opacity(
-              // opacity: reverseAnimation,
-              opacity: 1,
-              child: MarkdownStyledBody(data: _previousText),
-            ),
-          ),
-        ),
-        BlendMask(
-          blendMode: BlendMode.xor,
-          child: Opacity(
-            // opacity: forwardAnimation,
-            opacity: 1,
-            child: MarkdownStyledBody(data: widget.data),
-          ),
-        ),
-      ],
-    );
+    return AnimatedSwitcher(
+        // key: ValueKey<String>(_previousText),
+        duration: const Duration(milliseconds: 4000),
+        child: MarkdownStyledBody(
+            key: ValueKey<String>(_previousText), data: widget.data));
+
+    // Stack(
+    //   clipBehavior: Clip.none,
+    //   fit: StackFit.passthrough,
+    //   children: [
+    //     IgnorePointer(
+    //       child: MarkdownStyledBody(data: _previousText),
+    //     ),
+    //     MarkdownStyledBody(data: widget.data),
+    //   ],
+    // );
   }
 }
 

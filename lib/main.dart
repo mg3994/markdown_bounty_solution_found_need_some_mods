@@ -94,10 +94,8 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Markdown Fadein Example'),
       ),
-      body: SingleChildScrollView(
-        child: FadingMarkdownComponent(
-          data: currentText,
-        ),
+      body: FadingMarkdownComponent(
+        data: currentText,
       ),
       //  FadeMarkdown(
       //     // key: ValueKey(currentText),
