@@ -1,4 +1,5 @@
 <!-- To achieve a smooth transition where one MarkdownBody fades out while the other fades in, making them appear as one continuous element, -->
+Actual results: The animating back layer cannot reach 0 opacity smoothly, it stays there almost fully transperent, until the animation reaches the end, and then it sort of snaps out
 
 # markdown_fade
 

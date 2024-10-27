@@ -34,10 +34,9 @@ class BlendMask extends SingleChildRenderObjectWidget {
   const BlendMask({
     required this.blendMode,
     this.opacity = 1.0,
-    Key? key,
-    Widget? child,
-  })  : assert(opacity >= 0.0 && opacity <= 1.0),
-        super(key: key, child: child);
+    super.key,
+    super.child,
+  })  : assert(opacity >= 0.0 && opacity <= 1.0);
 
   @override
   RenderObject createRenderObject(BuildContext context) {

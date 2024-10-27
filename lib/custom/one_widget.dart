@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_fadein/flutter_fadein.dart';
+
 import 'package:flutter_markdown/flutter_markdown.dart';
+
+import 'blen_mask.dart';
+
 
 class FadingMarkdownComponent extends StatefulWidget {
   final String data;
@@ -19,7 +22,8 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
   late AnimationController _controller;
   late Tween<double> tween;
   late Tween<double> rtween;
-  late Animation<double> fadeValue;
+  late Animation<double> _forwardAnimation;
+  late ReverseAnimation _reverseAnimation;
 
   String _previousText = '';
   Duration duration = const Duration(seconds: 2);
@@ -28,22 +32,16 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      vsync: this,
-      duration: duration,
-    );
-
-    tween = Tween(
-      begin: 0.0,
-      end: 1.0,
-    );
-    rtween = Tween(
-      begin: 1.0,
-      end: 0.0,
-    );
-    fadeValue = tween.animate(_controller);
+        upperBound: 0.9999,
+        lowerBound: 0.0001,
+        vsync: this,
+        duration: duration,
+        reverseDuration: Duration.zero);
+    _reverseAnimation = ReverseAnimation(_controller);
+    _forwardAnimation = _controller;
     if (mounted) {
       _controller.reset();
-      _controller.forward(from: 0.0);
+      _controller.forward(from: 0.0001);
       _controller.addListener(() {
         setState(() {});
       });
@@ -57,7 +55,7 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
     if (oldWidget.data != widget.data) {
       setState(() {
         _controller.forward(
-            from: 0.0); // Restart fade-in only on true content change
+            from: 0.0001); // Restart fade-in only on true content change
         _previousText = oldWidget.data; // Update to the new data
       });
     }
@@ -72,28 +70,34 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('build' + _previousText);
-    final reverseOpacity = fadeValue.drive(rtween).value;
-    final opacity = fadeValue.value;
-    return RepaintBoundary(
-      key: ValueKey(widget.data),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          IgnorePointer(
+    var forwardAnimation =
+        double.parse(_forwardAnimation.value.toStringAsFixed(4));
+    var reverseAnimation =
+        double.parse(_reverseAnimation.value.toStringAsFixed(4));
+    debugPrint("forwardAnimation: $forwardAnimation");
+    debugPrint("reverseAnimation: $reverseAnimation");
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        BlendMask(
+          blendMode: BlendMode.xor,
+          child: IgnorePointer(
             child: Opacity(
-              opacity: reverseOpacity,
-              child: MarkdownStyledBody(
-                  key: ValueKey(_previousText), data: _previousText),
+              // opacity: reverseAnimation,
+              opacity: 1,
+              child: MarkdownStyledBody(data: _previousText),
             ),
           ),
-          Opacity(
-            opacity: opacity,
-            child: MarkdownStyledBody(
-                key: ValueKey(widget.data), data: widget.data),
+        ),
+        BlendMask(
+          blendMode: BlendMode.xor,
+          child: Opacity(
+            // opacity: forwardAnimation,
+            opacity: 1,
+            child: MarkdownStyledBody(data: widget.data),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

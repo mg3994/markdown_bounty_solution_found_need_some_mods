@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -95,8 +94,10 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Markdown Fadein Example'),
       ),
-      body: FadingMarkdownComponent(
-        data: currentText,
+      body: SingleChildScrollView(
+        child: FadingMarkdownComponent(
+          data: currentText,
+        ),
       ),
       //  FadeMarkdown(
       //     // key: ValueKey(currentText),
