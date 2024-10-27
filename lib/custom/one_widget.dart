@@ -44,6 +44,9 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
     if (mounted) {
       _controller.reset();
       _controller.forward(from: 0.0);
+      _controller.addListener(() {
+        setState(() {});
+      });
     }
   }
 
@@ -70,21 +73,21 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
   @override
   Widget build(BuildContext context) {
     debugPrint('build' + _previousText);
-    final reverseOpacity = fadeValue.drive(rtween);
-    final opacity = fadeValue;
+    final reverseOpacity = fadeValue.drive(rtween).value;
+    final opacity = fadeValue.value;
     return RepaintBoundary(
       key: ValueKey(widget.data),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           IgnorePointer(
-            child: FadeTransition(
+            child: Opacity(
               opacity: reverseOpacity,
               child: MarkdownStyledBody(
                   key: ValueKey(_previousText), data: _previousText),
             ),
           ),
-          FadeTransition(
+          Opacity(
             opacity: opacity,
             child: MarkdownStyledBody(
                 key: ValueKey(widget.data), data: widget.data),
