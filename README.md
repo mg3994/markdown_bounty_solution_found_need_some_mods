@@ -18,3 +18,5 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 https://pub.dev/packages/animated_widgets_flutter
+
+examples/api/lib/widgets/basic/flow.0.dart

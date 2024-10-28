@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'blen_mask.dart';
+import 'flow_del.dart';
 
 class FadingMarkdownComponent extends StatefulWidget {
   final String data;
@@ -16,8 +17,20 @@ class FadingMarkdownComponent extends StatefulWidget {
       _FadingMarkdownComponentState();
 }
 
-class _FadingMarkdownComponentState extends State<FadingMarkdownComponent> {
+class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
+    with TickerProviderStateMixin {
   String _previousText = '';
+  late final AnimationController _controller = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 2000));
+  late final Animation<double> fadeAnimation =
+      CurvedAnimation(parent: _controller, curve: Curves.linear);
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.reset();
+    _controller.forward();
+  }
 
   @override
   void didUpdateWidget(covariant FadingMarkdownComponent oldWidget) {
@@ -26,8 +39,15 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent> {
     if (oldWidget.data != widget.data) {
       setState(() {
         _previousText = oldWidget.data; // Update to the new data
+        _controller.forward(from: 0.0);
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
 // say no to any Animation Builder or that stuff , only can use is AnimationController , Curve you can choose is easeIn or linear , try custom pain for container and pass that animation<double> value to repaint: (animation.value) and hide on based of that
@@ -36,22 +56,17 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent> {
 //Limitation in old idea was Animation Builder is not working properly due to the property it creates its own CustomClip Painter
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-        // key: ValueKey<String>(_previousText),
-        duration: const Duration(milliseconds: 4000),
-        child: MarkdownStyledBody(
-            key: ValueKey<String>(_previousText), data: widget.data));
-
-    // Stack(
-    //   clipBehavior: Clip.none,
-    //   fit: StackFit.passthrough,
-    //   children: [
-    //     IgnorePointer(
-    //       child: MarkdownStyledBody(data: _previousText),
-    //     ),
-    //     MarkdownStyledBody(data: widget.data),
-    //   ],
-    // );
+    //Flow will handle RepaintBoundary.wrapAll
+    return Flow(
+      delegate: FlowOpacity(repaint: fadeAnimation),
+      clipBehavior: Clip.none,
+      children: [
+        IgnorePointer(
+          child: MarkdownStyledBody(data: _previousText),
+        ),
+        MarkdownStyledBody(data: widget.data),
+      ],
+    );
   }
 }
 
