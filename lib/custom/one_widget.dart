@@ -8,9 +8,11 @@ import 'blen_mask.dart';
 import 'flow_del.dart';
 
 class FadingMarkdownComponent extends StatefulWidget {
-  final String data;
+  final String newData;
+  final String previousData;
 
-  const FadingMarkdownComponent({super.key, required this.data});
+  const FadingMarkdownComponent(
+      {super.key, required this.newData, required this.previousData});
 
   @override
   State<FadingMarkdownComponent> createState() =>
@@ -36,10 +38,13 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
   void didUpdateWidget(covariant FadingMarkdownComponent oldWidget) {
     //do not touch this
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.data != widget.data) {
+    if (oldWidget.newData != widget.newData ||
+        oldWidget.previousData != widget.previousData) {
+      _controller.reset();
       setState(() {
-        _previousText = oldWidget.data; // Update to the new data
-        _controller.forward(from: 0.0);
+        _previousText = oldWidget.newData; // Update to the new data
+
+        _controller.forward();
       });
     }
   }
@@ -62,9 +67,13 @@ class _FadingMarkdownComponentState extends State<FadingMarkdownComponent>
       clipBehavior: Clip.none,
       children: [
         IgnorePointer(
-          child: MarkdownStyledBody(data: _previousText),
+          child: MarkdownStyledBody(
+              key: UniqueKey(), // Ensures each has a unique key
+              data: widget.previousData),
         ),
-        MarkdownStyledBody(data: widget.data),
+        MarkdownStyledBody(
+            key: UniqueKey(), // Ensures each has a unique key
+            data: widget.newData),
       ],
     );
   }

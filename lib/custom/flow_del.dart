@@ -5,17 +5,25 @@ class FlowOpacity extends FlowDelegate {
   FlowOpacity({required this.repaint}) : super(repaint: repaint);
   @override
   void paintChildren(FlowPaintingContext context) {
+    // var forwardOpacity = double.parse(repaint.value.toStringAsFixed(6));
+    // var reverseOpacity =
+    //     double.parse(ReverseAnimation(repaint).value.toStringAsFixed(6));
+    var forwardOpacity = repaint.value;
+    var reverseOpacity = ReverseAnimation(repaint).value;
+
     context.paintChild(0,
-        transform: Matrix4.identity(), opacity: 1.0 - repaint.value);
+        // transform: Matrix4.identity(),
+        opacity: reverseOpacity);
     context.paintChild(1,
-        transform: Matrix4.identity(), opacity: repaint.value);
+        // transform: Matrix4.identity(),
+        opacity: forwardOpacity);
+    debugPrint("forwardOpacity:" + forwardOpacity.toString());
+    debugPrint("reverseOpacity:" + reverseOpacity.toString());
   }
 
   @override
   bool shouldRepaint(FlowOpacity oldDelegate) {
-    if (repaint.value != oldDelegate.repaint.value) {
-      return true;
-    }
     return false;
+    // return repaint.value != oldDelegate.repaint.value;
   }
 }

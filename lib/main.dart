@@ -95,7 +95,8 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Markdown Fadein Example'),
       ),
       body: FadingMarkdownComponent(
-        data: currentText,
+        newData: currentText,
+         previousData: previousText,
       ),
       //  FadeMarkdown(
       //     // key: ValueKey(currentText),
